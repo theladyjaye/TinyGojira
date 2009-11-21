@@ -2,8 +2,9 @@
 require 'tinygojira/TinyGojira.php';
 $gojira = new TinyGojira();
 
-echo $gojira->nr_put('Pogo6', 'CatzManDu!!') ? 'success' : 'error';
-echo "<br>";
+$gojira->putcat('Pogo6', '__vsCatmanDont') ? 'success' : 'error';
+//echo $gojira->nr_put('Pogo6', 'CatzManDu!!') ? 'success' : 'error';
+//echo "<br>";
 /*
 $data = $gojira->get('Pogo5');
 echo $data === false ? 'error' : $data;

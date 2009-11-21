@@ -27,9 +27,12 @@
  **/
 class TinyGojira
 {
+	// NR = No Response
+	
 	const kCommandIdPrefix = 0xC8;
 	const kCommandPut      = 0x10;
-	const kCommandPutNR    = 0x18; // no response
+	const kCommandPutCat   = 0x12;
+	const kCommandPutNR    = 0x18;
 	const kCommandOut      = 0x20;
 	const kCommandGet      = 0x30;
 	
@@ -46,6 +49,15 @@ class TinyGojira
 		$len_key    = strlen($key);
 		$len_value  = strlen($value);
 		$data       = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPut, $len_key, $len_value).$key.$value;
+		
+		return $this->execute($data);
+	}
+	
+	public function putcat($key, $value)
+	{
+		$len_key    = strlen($key);
+		$len_value  = strlen($value);
+		$data       = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPutCat, $len_key, $len_value).$key.$value;
 		
 		return $this->execute($data);
 	}
