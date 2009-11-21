@@ -31,7 +31,9 @@ class TinyGojira
 	
 	const kCommandIdPrefix = 0xC8;
 	const kCommandPut      = 0x10;
+	const kCommandPutKeep  = 0x11;
 	const kCommandPutCat   = 0x12;
+	const kCommandPutSh1   = 0x13;
 	const kCommandPutNR    = 0x18;
 	const kCommandOut      = 0x20;
 	const kCommandGet      = 0x30;
@@ -46,29 +48,34 @@ class TinyGojira
 	
 	public function put($key, $value)
 	{
-		$len_key    = strlen($key);
-		$len_value  = strlen($value);
-		$data       = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPut, $len_key, $len_value).$key.$value;
-		
-		return $this->execute($data);
+		return $this->execute($this->prepare_put(TinyGojira::kCommandPut, $key, $value));
+	}
+	
+	public function putkeep($key, $value)
+	{
+		return $this->execute($this->prepare_put(TinyGojira::kCommandKeep, $key, $value));
 	}
 	
 	public function putcat($key, $value)
 	{
-		$len_key    = strlen($key);
-		$len_value  = strlen($value);
-		$data       = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPutCat, $len_key, $len_value).$key.$value;
-		
+		return $this->execute($this->prepare_put(TinyGojira::kCommandPutCat, $key, $value));
+	}
+	
+	public function putshl($key, $value, $width)
+	{
+		$data =  pack("CCNNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPutSh1, strlen($key), strlen($value), $width).$key.$value;
 		return $this->execute($data);
 	}
 	
-	public function nr_put($key, $value)
+	public function putnr($key, $value)
 	{
-		$len_key    = strlen($key);
-		$len_value  = strlen($value);
-		$data       = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPutNR, $len_key, $len_value).$key.$value;
-		
-		$this->execute($data, true);
+		$this->execute($this->prepare_put(TinyGojira::kCommandPutNR, $key, $value), true);
+	}
+	
+	public function out($key)
+	{
+		$data   = pack("CCN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandOut, strlen($key)).$key;
+		return $this->execute($data);
 	}
 	
 	public function get($key)
@@ -84,12 +91,6 @@ class TinyGojira
 		}
 		
 		return $result;
-	}
-	
-	public function out($key)
-	{
-		$data   = pack("CCN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandOut, strlen($key)).$key;
-		return $this->execute($data);
 	}
 	
 	private function create_client($options=null)
@@ -109,6 +110,11 @@ class TinyGojira
 			throw new Exception('TinyGojira unable to connect to host '.$socket.' : '.$errno.', '.$errstr);
 			return;
 		}
+	}
+	
+	private function prepare_put($command, $key, $value)
+	{
+		return pack("CCNN", TinyGojira::kCommandIdPrefix, $command, strlen($key), strlen($value)).$key.$value;
 	}
 	
 	private function execute($data, $no_response=false)
