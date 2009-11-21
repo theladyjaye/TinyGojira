@@ -15,4 +15,5 @@ echo "<br>";
 $data = $gojira->get('Pogo5');
 echo $data === false ? 'error' : $data;
 echo "<br>";
+
 ?>

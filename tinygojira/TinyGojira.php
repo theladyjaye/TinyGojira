@@ -46,7 +46,7 @@ class TinyGojira
 		$len_value  = strlen($value);
 		$data       = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPut, $len_key, $len_value).$key.$value;
 		
-		return $this->execute($dataata);
+		return $this->execute($data);
 	}
 	
 	public function get($key)
@@ -89,18 +89,18 @@ class TinyGojira
 		}
 	}
 	
+	private function execute($data)
+	{
+		stream_socket_sendto($this->client, $data);
+		return $this->ok();
+	}
+	
 	private function ok()
 	{
 		//$data   = stream_socket_recvfrom($this->client, 1, STREAM_PEEK);
 		$data   = stream_socket_recvfrom($this->client, 1);
 		$result = unpack('cok/', $data);
 		return $result['ok'] == 0 ? true : false;
-	}
-	
-	private function execute($data)
-	{
-		stream_socket_sendto($this->client, $data);
-		return $this->ok();
 	}
 	
 	public function __destruct()
