@@ -37,6 +37,7 @@ class TinyGojira
 	const kCommandPutNR    = 0x18;
 	const kCommandOut      = 0x20;
 	const kCommandGet      = 0x30;
+	const kCommandMGet     = 0x31;
 	
 	private $stream;
 	private $client;
@@ -53,7 +54,7 @@ class TinyGojira
 	
 	public function putkeep($key, $value)
 	{
-		return $this->execute($this->prepare_put(TinyGojira::kCommandKeep, $key, $value));
+		return $this->execute($this->prepare_put(TinyGojira::kCommandPutKeep, $key, $value));
 	}
 	
 	public function putcat($key, $value)
@@ -88,6 +89,38 @@ class TinyGojira
 			$info     = unpack('Nlength/' ,stream_socket_recvfrom($this->client, 4));
 			$response = unpack("A".$info['length']."data", stream_socket_recvfrom($this->client, $info['length']));
 			$result   =  $response['data'];
+		}
+		
+		return $result;
+	}
+	
+	public function mget($array)
+	{
+		$result = false;
+		$data   = pack("CCN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandMGet, count($array));
+		$keys   = "";
+		
+		foreach($array as $key)
+		{
+			$data = $data.pack("N", strlen($key));
+			$data = $data.$key;
+		}
+		
+		if($this->execute($data))
+		{
+			$info   = unpack('Nrecords/' ,stream_socket_recvfrom($this->client, 4));
+			if($info['records'] > 0)
+			{
+				$result = array();
+				for($i=0; $i < $info['records']; $i++)
+				{
+					$record_info = unpack("Nkey/Nvalue", stream_socket_recvfrom($this->client, 8));
+					$pattern     = "A".$record_info['key']."key/A".$record_info['value']."value";
+					$length      = $record_info['key']+$record_info['value'];
+					$record_data = unpack($pattern, stream_socket_recvfrom($this->client, $length));
+					$result[$record_data['key']] = $record_data['value'];
+				}
+			}
 		}
 		
 		return $result;
