@@ -11,7 +11,8 @@ $gojira->putkeep('Pogo6', 'cat6') ? 'success' : 'error';
 $gojira->putkeep('Pogo7', 'cat7') ? 'success' : 'error';
 */
 
-$gojira->mget(array('Pogo3', 'Pogo1', 'Pogo6'));
+//$gojira->mget(array('Pogo3', 'Pogo1', 'Pogo6'));
+$gojira->fwmkeys('Pogo', 7);
 //echo $gojira->nr_put('Pogo6', 'CatzManDu!!') ? 'success' : 'error';
 //echo "<br>";
 /*
