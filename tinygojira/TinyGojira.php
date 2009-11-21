@@ -29,6 +29,7 @@ class TinyGojira
 {
 	const kCommandIdPrefix = 0xC8;
 	const kCommandPut      = 0x10;
+	const kCommandPutNR    = 0x18; // no response
 	const kCommandOut      = 0x20;
 	const kCommandGet      = 0x30;
 	
@@ -47,6 +48,15 @@ class TinyGojira
 		$data       = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPut, $len_key, $len_value).$key.$value;
 		
 		return $this->execute($data);
+	}
+	
+	public function nr_put($key, $value)
+	{
+		$len_key    = strlen($key);
+		$len_value  = strlen($value);
+		$data       = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPutNR, $len_key, $len_value).$key.$value;
+		
+		$this->execute($data, true);
 	}
 	
 	public function get($key)
@@ -89,10 +99,18 @@ class TinyGojira
 		}
 	}
 	
-	private function execute($data)
+	private function execute($data, $no_response=false)
 	{
 		stream_socket_sendto($this->client, $data);
-		return $this->ok();
+		
+		if($no_response)
+		{
+			return;
+		}
+		else
+		{
+			return $this->ok();
+		}
 	}
 	
 	private function ok()
