@@ -28,7 +28,6 @@
 class TinyGojira
 {
 	const kCommandIdPrefix = 0xC8;
-	
 	const kCommandPut      = 0x10;
 	const kCommandOut      = 0x20;
 	const kCommandGet      = 0x30;
@@ -38,7 +37,7 @@ class TinyGojira
 	
 	public function __construct($options=null)
 	{
-		$this->createSocket($options);
+		$this->create_client($options);
 	}
 	
 	public function put($key, $value)
@@ -71,7 +70,7 @@ class TinyGojira
 		return $this->execute($data);
 	}
 	
-	private function createSocket($options=null)
+	private function create_client($options=null)
 	{
 		$transport = isset($options['transport']) ? $options['transport'] : 'tcp://';
 		$timeout   = isset($options['timeout']) ? $options['timeout']     : 10;
