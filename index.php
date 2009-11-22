@@ -1,10 +1,10 @@
 <?php
 require 'tinygojira/TinyGojira.php';
 $gojira = new TinyGojira();
-/*
-for($i = 0; $i < 200000; $i++)
+
+/*for($i = 0; $i < 200000; $i++)
 {
-	$gojira->put('pogo_l'.$i, 'cat'.$i);
+	$gojira->put('pogo'.$i, 'cat'.$i);
 }
 */
 /*$gojira->putkeep('Pogo1', 'cat1') ? 'success' : 'error';
@@ -44,7 +44,9 @@ echo "<br>";
 //echo $data === false ? 'error' : $data;
 //echo "<br>";
 
-$gojira->vanish();
-echo $gojira->rnum();
+//$gojira->vanish();
+//echo $gojira->rnum()."<br>";
+//echo $gojira->size();
+echo $gojira->stat();
 
 ?>

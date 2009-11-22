@@ -44,6 +44,7 @@ class TinyGojira
 	const kCommandVanish    = 0x72;
 	const kCommandRnum      = 0x80;
 	const kCommandSize      = 0x81;
+	const kCommandStat      = 0x88;
 	
 	private $stream;
 	private $client;
@@ -184,14 +185,45 @@ class TinyGojira
 		$number  = (double) $number;
 	}*/
 	
+	public function vanish()
+	{
+		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandVanish);
+		return $this->execute($data);
+	}
+	
 	public function rnum()
 	{
-		$result = false;
 		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandRnum);
 		
 		// this command always returns with a status of 0
 		$this->execute($data);
+		return $this->read_64bit_int();
+	}
+	
+	public function size()
+	{
+		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandSize);
 		
+		// this command always returns with a status of 0
+		$this->execute($data);
+		return $this->read_64bit_int();
+	}
+	
+	public function stat()
+	{
+		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandStat);
+		
+		// this command always returns with a status of 0
+		$this->execute($data);
+		$response    = unpack("Nlength", stream_socket_recvfrom($this->client, 4));
+		$record_data = unpack("A".$response['length']."value", stream_socket_recvfrom($this->client, $response['length']));
+		
+		return $record_data['value'];
+	}
+	
+	private function read_64bit_int()
+	{
+		$result = false;
 		if(PHP_INT_SIZE == 8) // 64 bit
 		{
 			$record_data = unpack("H16value", stream_socket_recvfrom($this->client, 8));
@@ -222,17 +254,6 @@ class TinyGojira
 		}
 		
 		return $result;
-	}
-	
-	public function vanish()
-	{
-		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandVanish);
-		return $this->execute($data);
-	}
-	
-	public function size()
-	{
-		
 	}
 	
 	private function create_client($options=null)
