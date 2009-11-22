@@ -44,6 +44,7 @@ echo "<br>";
 //echo $data === false ? 'error' : $data;
 //echo "<br>";
 
+$gojira->vanish();
 echo $gojira->rnum();
 
 ?>

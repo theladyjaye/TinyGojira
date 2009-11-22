@@ -41,6 +41,7 @@ class TinyGojira
 	const kCommandFwmKeys   = 0x58;
 	const kCommandAddInt    = 0x60;
 	const kCommandAddDouble = 0x61;
+	const kCommandVanish    = 0x72;
 	const kCommandRnum      = 0x80;
 	const kCommandSize      = 0x81;
 	
@@ -221,6 +222,12 @@ class TinyGojira
 		}
 		
 		return $result;
+	}
+	
+	public function vanish()
+	{
+		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandVanish);
+		return $this->execute($data);
 	}
 	
 	public function size()
