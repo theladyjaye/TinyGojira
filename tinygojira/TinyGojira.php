@@ -29,16 +29,20 @@ class TinyGojira
 {
 	// NR = No Response
 	
-	const kCommandIdPrefix = 0xC8;
-	const kCommandPut      = 0x10;
-	const kCommandPutKeep  = 0x11;
-	const kCommandPutCat   = 0x12;
-	const kCommandPutSh1   = 0x13;
-	const kCommandPutNR    = 0x18;
-	const kCommandOut      = 0x20;
-	const kCommandGet      = 0x30;
-	const kCommandMGet     = 0x31;
-	const kCommandFwmKeys  = 0x58;
+	const kCommandIdPrefix  = 0xC8;
+	const kCommandPut       = 0x10;
+	const kCommandPutKeep   = 0x11;
+	const kCommandPutCat    = 0x12;
+	const kCommandPutSh1    = 0x13;
+	const kCommandPutNR     = 0x18;
+	const kCommandOut       = 0x20;
+	const kCommandGet       = 0x30;
+	const kCommandMGet      = 0x31;
+	const kCommandFwmKeys   = 0x58;
+	const kCommandAddInt    = 0x60;
+	const kCommandAddDouble = 0x61;
+	const kCommandRnum      = 0x80;
+	const kCommandSize      = 0x81;
 	
 	private $stream;
 	private $client;
@@ -151,6 +155,77 @@ class TinyGojira
 		}
 		
 		return $result;
+	}
+	/*
+	public function addint($key, $number=0)
+	{
+		$result = false;
+		
+		$number = (int) $number;
+		//$data   = pack("CCNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandAddInt, strlen($key), (int) $number).$key;
+		$data = pack("CCNN", 0xC8, 0x60, strlen($key), (int)$number) . $key;
+		
+		if($this->execute($data))
+		{
+			$record_data = unpack('Nvalue/' ,stream_socket_recvfrom($this->client, 4));
+			print_r($record_data);
+			$result      = (int) $record_data['value'];
+		}
+		
+		return $result;
+	}
+	*/
+
+	
+	/*public function adddouble($key, $number)
+	{
+		$result  = false;
+		$number  = (double) $number;
+	}*/
+	
+	public function rnum()
+	{
+		$result = false;
+		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandRnum);
+		
+		// this command always returns with a status of 0
+		$this->execute($data);
+		
+		if(PHP_INT_SIZE == 8) // 64 bit
+		{
+			$record_data = unpack("H16value", stream_socket_recvfrom($this->client, 8));
+			$result = hexdec($record_data['value']);
+		}
+		else // 32 bit
+		{
+			$record_data = unpack("Nhigh/Nlow", stream_socket_recvfrom($this->client, 8));
+			
+			if($temp['high'] > 0)
+			{
+				if(function_exists('gmp_init'))
+				{
+					$hex = "0x".dechex($record_data['high']).dechex($record_data['low']);
+					$result = gmp_strval(gmp_init($hex, 16));
+				}
+				else
+				{
+					// probably should convert this to a string...
+					trigger_error("64 bit value required result truncated to 32 bits", E_USER_NOTICE);
+					$result = $record_data['low'];
+				}
+			}
+			else
+			{
+				$result = $record_data['low'];
+			}
+		}
+		
+		return $result;
+	}
+	
+	public function size()
+	{
+		
 	}
 	
 	private function create_client($options=null)
