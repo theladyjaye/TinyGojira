@@ -38,6 +38,7 @@ class TinyGojira
 	const kCommandOut       = 0x20;
 	const kCommandGet       = 0x30;
 	const kCommandMGet      = 0x31;
+	const kCommandVSize     = 0x38;
 	const kCommandFwmKeys   = 0x58;
 	const kCommandAddInt    = 0x60;
 	const kCommandAddDouble = 0x61;
@@ -129,6 +130,20 @@ class TinyGojira
 					$result[$record_data['key']] = $record_data['value'];
 				}
 			}
+		}
+		
+		return $result;
+	}
+	
+	public function vsiz($key)
+	{
+		$result = false;
+		$data   = pack("CCN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandVSize, strlen($key)).$key;
+		
+		if($this->execute($data))
+		{
+			$response = unpack("Nlength", stream_socket_recvfrom($this->client, 4));
+			$result = $response['length'];
 		}
 		
 		return $result;

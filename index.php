@@ -2,6 +2,8 @@
 require 'tinygojira/TinyGojira.php';
 $gojira = new TinyGojira();
 
+echo $gojira->vsiz('pogo1');
+
 /*for($i = 0; $i < 200000; $i++)
 {
 	$gojira->put('pogo'.$i, 'cat'.$i);
@@ -47,6 +49,6 @@ echo "<br>";
 //$gojira->vanish();
 //echo $gojira->rnum()."<br>";
 //echo $gojira->size();
-echo $gojira->stat();
+//echo $gojira->stat();
 
 ?>
