@@ -83,6 +83,7 @@ class TinyGojira
 	 * @param string $value the value of the record
 	 * @return boolean true/false upon success respectively
 	 * @author Adam Venturella
+	 * @example ../samples/put/put_general.php Insert data
 	 */
 	public function put($key, $value)
 	{
@@ -96,6 +97,7 @@ class TinyGojira
 	 * @param string $value 
 	 * @return boolean true/false upon success respectively
 	 * @author Adam Venturella
+	 * @example ../samples/put/putkeep_general.php Insert data, do not replace existing data with same key
 	 */
 	public function putkeep($key, $value)
 	{
@@ -110,6 +112,7 @@ class TinyGojira
 	 * @param string $value 
 	 * @return boolean true/false upon success respectively
 	 * @author Adam Venturella
+	 * @example ../samples/put/putcat_general.php Concatenate data
 	 */
 	public function putcat($key, $value)
 	{
@@ -125,6 +128,7 @@ class TinyGojira
 	 * @param string $width 
 	 * @return boolean true/false upon success respectively
 	 * @author Adam Venturella
+	 * @example ../samples/put/putshl_general.php Concatenate and shift to left
 	 */
 	public function putshl($key, $value, $width)
 	{
@@ -152,6 +156,7 @@ class TinyGojira
 	 * @param string $key 
 	 * @return boolean true/false upon success respectively
 	 * @author Adam Venturella
+	 * @example ../samples/delete/out_general.php Delete data from the database
 	 */
 	public function out($key)
 	{
@@ -165,6 +170,7 @@ class TinyGojira
 	 * @param string $key 
 	 * @return string
 	 * @author Adam Venturella
+	 * @example ../samples/get/get_general.php Retrieve data from the database
 	 */
 	public function get($key)
 	{
@@ -187,6 +193,7 @@ class TinyGojira
 	 * @param string $array strings representing keys in the database to return values for
 	 * @return array key/value array where keys from the argument $array contain their corresponding values
 	 * @author Adam Venturella
+	 * @example ../samples/get/mget_general.php Retrieve multiple records from the database with given keys
 	 */
 	public function mget($array)
 	{
@@ -244,15 +251,16 @@ class TinyGojira
 	
 	/**
 	 * Get forward matching keys in a database.  
-	 * eg: get all keys starting with the prefix "foo"
+	 * eg: get all keys starting with the prefix "monster:"
 	 * number of results is limited by the $count argument
 	 *
 	 * @param string $prefix 
 	 * @param int $count 
 	 * @return mixed false on error or array of matching keys
 	 * @author Adam Venturella
+	 * @example ../samples/get/fwmkeys_general.php Get keys matching a prefix
 	 */
-	public function fwmkeys($prefix, $count=0)
+	public function fwmkeys($prefix, $count=-1)
 	{
 		$result = false;
 		$count  = (int) $count;
@@ -308,6 +316,7 @@ class TinyGojira
 	 *
 	 * @return boolean true/false upon success respectively
 	 * @author Adam Venturella
+	 * @example ../samples/delete/vanish_general.php Remove all records from the database
 	 */
 	public function vanish()
 	{
@@ -320,6 +329,7 @@ class TinyGojira
 	 *
 	 * @return int will return 0 or greater
 	 * @author Adam Venturella
+	 * @example ../samples/misc/rnum_general.php Get the number of records in the database
 	 */
 	public function rnum()
 	{
@@ -335,6 +345,7 @@ class TinyGojira
 	 *
 	 * @return int
 	 * @author Adam Venturella
+	 * @example ../samples/misc/size_general.php Get the size of the database on disk or in memory
 	 */
 	public function size()
 	{
@@ -350,6 +361,7 @@ class TinyGojira
 	 *
 	 * @return string
 	 * @author Adam Venturella
+	 * @example ../samples/misc/stat_general.php Get the status string of the database
 	 */
 	public function stat()
 	{

@@ -1,8 +1,7 @@
 <?php
 require 'tinygojira/TinyGojira.php';
 $gojira = new TinyGojira();
-
-echo $gojira->vsiz('pogo1');
+//echo $gojira->vsiz('pogo1');
 
 /*for($i = 0; $i < 200000; $i++)
 {
