@@ -25,6 +25,13 @@
  *    @license http://www.apache.org/licenses/LICENSE-2.0 Apache 2.0
  *
  **/
+
+/**
+ * Principal TinyGojira Class
+ *
+ * @package Core
+ * @author Adam Venturella
+ */
 class TinyGojira
 {
 	// NR = No Response
@@ -50,43 +57,115 @@ class TinyGojira
 	private $stream;
 	private $client;
 	
+	/**
+	 * TinyGojira Constructor
+	 * @see TinyGojira::create_client()
+	 *
+	 *
+	 * @param array $options 
+	 *               Available option keys:
+	 *               transport => if not provided defaults to tcp://
+	 *               timeout   => if not provided defaults to 10
+	 *               port      => if not provided defaults to 1978
+	 *               host      => if not provided defaults to 0.0.0.0
+	 *               
+	 * @author Adam Venturella
+	 */
 	public function __construct($options=null)
 	{
 		$this->create_client($options);
 	}
 	
+	/**
+	 * Store a record into the database.
+	 *
+	 * @param string $key the key of the record
+	 * @param string $value the value of the record
+	 * @return boolean true/false upon success respectively
+	 * @author Adam Venturella
+	 */
 	public function put($key, $value)
 	{
 		return $this->execute($this->prepare_put(TinyGojira::kCommandPut, $key, $value));
 	}
 	
+	/**
+	 * Store a record into the database.  Do not replace an existing record
+	 *
+	 * @param string $key 
+	 * @param string $value 
+	 * @return boolean true/false upon success respectively
+	 * @author Adam Venturella
+	 */
 	public function putkeep($key, $value)
 	{
 		return $this->execute($this->prepare_put(TinyGojira::kCommandPutKeep, $key, $value));
 	}
 	
+	/**
+	 * Concatenate a value at the end of the existing record.  
+	 * If no record exists a new record is created 
+	 *
+	 * @param string $key 
+	 * @param string $value 
+	 * @return boolean true/false upon success respectively
+	 * @author Adam Venturella
+	 */
 	public function putcat($key, $value)
 	{
 		return $this->execute($this->prepare_put(TinyGojira::kCommandPutCat, $key, $value));
 	}
 	
+	/**
+	 * Concatenate a value at the end of the existing record and shift it to the left.
+	 * If no record exists a new record is created 
+	 *
+	 * @param string $key 
+	 * @param string $value 
+	 * @param string $width 
+	 * @return boolean true/false upon success respectively
+	 * @author Adam Venturella
+	 */
 	public function putshl($key, $value, $width)
 	{
 		$data =  pack("CCNNN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandPutSh1, strlen($key), strlen($value), $width).$key.$value;
 		return $this->execute($data);
 	}
 	
+	/**
+	 * Store a record into the database with no success/failure response
+	 * from the server for the operation.
+	 *
+	 * @param string $key 
+	 * @param string $value 
+	 * @return void
+	 * @author Adam Venturella
+	 */
 	public function putnr($key, $value)
 	{
 		$this->execute($this->prepare_put(TinyGojira::kCommandPutNR, $key, $value), true);
 	}
 	
+	/**
+	 * Remove a record from the database
+	 *
+	 * @param string $key 
+	 * @return boolean true/false upon success respectively
+	 * @author Adam Venturella
+	 */
 	public function out($key)
 	{
 		$data   = pack("CCN", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandOut, strlen($key)).$key;
 		return $this->execute($data);
 	}
 	
+	/**
+	 * Retrieve a record from the database for a given key
+	 *
+	 * @param string $key 
+	 * @return string
+	 * @author Adam Venturella
+	 */
 	public function get($key)
 	{
 		$result = false;
@@ -102,6 +181,13 @@ class TinyGojira
 		return $result;
 	}
 	
+	/**
+	 * Retrieve multiple records from the database for an array of keys
+	 *
+	 * @param string $array strings representing keys in the database to return values for
+	 * @return array key/value array where keys from the argument $array contain their corresponding values
+	 * @author Adam Venturella
+	 */
 	public function mget($array)
 	{
 		$result = false;
@@ -135,6 +221,13 @@ class TinyGojira
 		return $result;
 	}
 	
+	/**
+	 * Get the size the value of a record in the database for a given key.
+	 *
+	 * @param string $key 
+	 * @return mixed false if no record is found, or int representing the length
+	 * @author Adam Venturella
+	 */
 	public function vsiz($key)
 	{
 		$result = false;
@@ -149,7 +242,17 @@ class TinyGojira
 		return $result;
 	}
 	
-	public function fwmkeys($prefix, $count)
+	/**
+	 * Get forward matching keys in a database.  
+	 * eg: get all keys starting with the prefix "foo"
+	 * number of results is limited by the $count argument
+	 *
+	 * @param string $prefix 
+	 * @param int $count 
+	 * @return mixed false on error or array of matching keys
+	 * @author Adam Venturella
+	 */
+	public function fwmkeys($prefix, $count=0)
 	{
 		$result = false;
 		$count  = (int) $count;
@@ -200,12 +303,24 @@ class TinyGojira
 		$number  = (double) $number;
 	}*/
 	
+	/**
+	 * Remove all records from the database
+	 *
+	 * @return boolean true/false upon success respectively
+	 * @author Adam Venturella
+	 */
 	public function vanish()
 	{
 		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandVanish);
 		return $this->execute($data);
 	}
 	
+	/**
+	 * Number of records in the database
+	 *
+	 * @return int will return 0 or greater
+	 * @author Adam Venturella
+	 */
 	public function rnum()
 	{
 		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandRnum);
@@ -215,6 +330,12 @@ class TinyGojira
 		return $this->read_64bit_int();
 	}
 	
+	/**
+	 * Get the size, in bytes, of the database
+	 *
+	 * @return int
+	 * @author Adam Venturella
+	 */
 	public function size()
 	{
 		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandSize);
@@ -224,6 +345,12 @@ class TinyGojira
 		return $this->read_64bit_int();
 	}
 	
+	/**
+	 * Get the status string of the database
+	 *
+	 * @return string
+	 * @author Adam Venturella
+	 */
 	public function stat()
 	{
 		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandStat);
@@ -236,6 +363,19 @@ class TinyGojira
 		return $record_data['value'];
 	}
 	
+	/**
+	 * Used to return a value from $this->size() and $this->rnum()
+	 * those 2 methods return a 64 bit value.  If a 64 bit value is 
+	 * required on a 32 bit system, it will attempt to send back a string 
+	 * representation of the number assuming gmp_* functions are available.
+	 * See: {@link http://php.net/gmp PHP GMP Manual}.
+	 * Otherwise, on 32 bit systems it will only return a 32 bit int:
+	 * 2,147,483,647 Max
+	 * 
+	 *
+	 * @return int Architecture dependent
+	 * @author Adam Venturella
+	 */
 	private function read_64bit_int()
 	{
 		$result = false;
@@ -271,6 +411,18 @@ class TinyGojira
 		return $result;
 	}
 	
+	/**
+	 * Create the client socket connection to the server
+	 *
+	 * @param array $options
+	 *               Available option keys:
+	 *               transport => if not provided defaults to tcp://
+	 *               timeout   => if not provided defaults to 10
+	 *               port      => if not provided defaults to 1978
+	 *               host      => if not provided defaults to 0.0.0.0
+	 * @return void
+	 * @author Adam Venturella
+	 */
 	private function create_client($options=null)
 	{
 		$transport = isset($options['transport']) ? $options['transport'] : 'tcp://';
@@ -290,11 +442,31 @@ class TinyGojira
 		}
 	}
 	
+	/**
+	 * The put operations all a require a bit of similar work.
+	 * this is a convenience method to that end
+	 *
+	 * @param string $command 
+	 * @param string $key 
+	 * @param string $value 
+	 * @return void
+	 * @author Adam Venturella
+	 */
 	private function prepare_put($command, $key, $value)
 	{
 		return pack("CCNN", TinyGojira::kCommandIdPrefix, $command, strlen($key), strlen($value)).$key.$value;
 	}
 	
+	/**
+	 * Execute a command on the database
+	 *
+	 * @param bytes $data 
+	 * @param string $no_response Do we expect a response from the server?  
+	 *                            If false, error checking occurs.  Otherwise, if true
+	 *                            We do not check for any errors.
+	 * @return void
+	 * @author Adam Venturella
+	 */
 	private function execute($data, $no_response=false)
 	{
 		stream_socket_sendto($this->client, $data);
@@ -309,6 +481,12 @@ class TinyGojira
 		}
 	}
 	
+	/**
+	 * Check a command to see if an error occured
+	 *
+	 * @return boolean true means all is well, false means we had a problem.
+	 * @author Adam Venturella
+	 */
 	private function ok()
 	{
 		//$data   = stream_socket_recvfrom($this->client, 1, STREAM_PEEK);
@@ -317,6 +495,12 @@ class TinyGojira
 		return $result['ok'] == 0 ? true : false;
 	}
 	
+	/**
+	 * Be sure to close the socket connection.
+	 *
+	 * @return void
+	 * @author Adam Venturella
+	 */
 	public function __destruct()
 	{
 		fclose($this->client);
