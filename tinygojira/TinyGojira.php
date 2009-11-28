@@ -567,7 +567,7 @@ class TinyGojira implements Countable, Iterator
 	 * @return void
 	 * @author Adam Venturella
 	 */
-	private function rewind() 
+	public function rewind() 
 	{
 		$this->iterinit();
 		$this->iterator_key = $this->iternext();
@@ -612,7 +612,7 @@ class TinyGojira implements Countable, Iterator
 	 * @return void
 	 * @author Adam Venturella
 	 */
-	private function valid() 
+	public function valid() 
 	{
 		return $this->vsiz($this->iterator_key) > 0 ? true : false;
 	}
