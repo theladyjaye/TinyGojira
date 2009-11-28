@@ -32,7 +32,7 @@
  * @package Core
  * @author Adam Venturella
  */
-class TinyGojira
+class TinyGojira implements Countable, Iterator
 {
 	// NR = No Response
 	
@@ -46,6 +46,8 @@ class TinyGojira
 	const kCommandGet       = 0x30;
 	const kCommandMGet      = 0x31;
 	const kCommandVSize     = 0x38;
+	const kCommandIterInit  = 0x50;
+	const kCommandIterNext  = 0x51;
 	const kCommandFwmKeys   = 0x58;
 	const kCommandAddInt    = 0x60;
 	const kCommandAddDouble = 0x61;
@@ -56,6 +58,8 @@ class TinyGojira
 	
 	private $stream;
 	private $client;
+	private $iterator_position = 0;
+	private $iterator_key;
 	
 	/**
 	 * TinyGojira Constructor
@@ -223,6 +227,45 @@ class TinyGojira
 					$result[$record_data['key']] = $record_data['value'];
 				}
 			}
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * Initialize the iterator of the database.
+	 *
+	 * @return boolean true/false respectively upon success/fail
+	 * @author Adam Venturella
+	 */
+	public function iterinit()
+	{
+		$result = false;
+		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandIterInit);
+		
+		if($this->execute($data)){
+			$result = true;
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * Get the next key of the iterator of the database.
+	 *
+	 * @return mixed false if error else value of the key
+	 * @author Adam Venturella
+	 */
+	public function iternext()
+	{
+		
+		$result = false;
+		$data   = pack("CC", TinyGojira::kCommandIdPrefix, TinyGojira::kCommandIterNext);
+		if($this->execute($data))
+		{
+			$record_info = unpack("Nlength/", stream_socket_recvfrom($this->client, 4));
+			$record_data = unpack("A".$record_info['length']."data", stream_socket_recvfrom($this->client, $record_info['length']));
+			$result = $record_data['data'];
 		}
 		
 		return $result;
@@ -505,6 +548,73 @@ class TinyGojira
 		$data   = stream_socket_recvfrom($this->client, 1);
 		$result = unpack('cok/', $data);
 		return $result['ok'] == 0 ? true : false;
+	}
+	
+	/**
+	 * Countable implementation
+	 *
+	 * @return int
+	 * @author Adam Venturella
+	 */
+	public function count()
+	{
+		return $this->rnum();
+	}
+	
+	/**
+	 * Iterator implementation
+	 *
+	 * @return void
+	 * @author Adam Venturella
+	 */
+	private function rewind() 
+	{
+		$this->iterinit();
+		$this->iterator_key = $this->iternext();
+	}
+
+	/**
+	 * Iterator implementation
+	 *
+	 * @return void
+	 * @author Adam Venturella
+	 */
+	public function current() 
+	{
+		return $this->get($this->iterator_key);
+	}
+
+	/**
+	 * Iterator implementation
+	 *
+	 * @return void
+	 * @author Adam Venturella
+	 */
+	public function key() 
+	{
+		return $this->iterator_key;
+	}
+
+	/**
+	 * Iterator implementation
+	 *
+	 * @return void
+	 * @author Adam Venturella
+	 */
+	public function next() 
+	{
+		$this->iterator_key = $this->iternext();
+	}
+	
+	/**
+	 * Iterator implementation
+	 *
+	 * @return void
+	 * @author Adam Venturella
+	 */
+	private function valid() 
+	{
+		return $this->vsiz($this->iterator_key) > 0 ? true : false;
 	}
 	
 	/**

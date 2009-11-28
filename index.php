@@ -46,7 +46,7 @@ echo "<br>";
 //echo "<br>";
 
 //$gojira->vanish();
-//echo $gojira->rnum()."<br>";
+echo $gojira->rnum()."<br>";
 //echo $gojira->size();
 //echo $gojira->stat();
 
